@@ -2,6 +2,7 @@ import sys,sqlite3
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from pygame import *
 
 IDRFID: str
 
@@ -280,7 +281,6 @@ class rfidDialog(QDialog):
         layout.addWidget(self.QBtnPair)
 
 
-        self.cardinput.setText('466849654')
         #cardinput.connectNotify(self.getRfid)
 
 
