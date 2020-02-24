@@ -2,11 +2,15 @@ import os
 import sys, sqlite3
 
 import nfc
+import cv2
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from gtts import gTTS
 from playsound import playsound
+import threading
+
+
 
 IDRFID: str
 IDUSER: int
@@ -71,7 +75,6 @@ class InsertDialog(QDialog):
         tag_id = str(tag).split('ID=')[1]
         self.cardinput.setText(str(tag_id))
 
-
     def addstudent(self):
         name = ""
         branch = ""
@@ -85,7 +88,8 @@ class InsertDialog(QDialog):
         try:
             self.conn = sqlite3.connect("database.db")
             self.c = self.conn.cursor()
-            self.c.execute("INSERT INTO task (name,branch,address,card,idUser) VALUES (?,?,?,?,?)", (name, branch, address, idCard, IDUSER))
+            self.c.execute("INSERT INTO task (name,branch,address,card,idUser) VALUES (?,?,?,?,?)",
+                           (name, branch, address, idCard, IDUSER))
             self.conn.commit()
             self.c.close()
             self.conn.close()
@@ -93,7 +97,6 @@ class InsertDialog(QDialog):
             self.close()
         except Exception:
             QMessageBox.warning(QMessageBox(), 'Error', 'No se puede añadir la tarea a la base de datos.')
-
 
     def open_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open image", "/Users", "Images (*.png *)jpg *.txt")
@@ -222,9 +225,9 @@ class LoginDialog(QDialog):
                 break
         if (self.userinput.text() == str(row_data[0]) and self.passinput.text() == str(row_data[1])):
             self.accept()
-        else: QMessageBox.warning(self, 'Error', 'Credenciales inválidas, vuelve a intentarlo.')
+        else:
+            QMessageBox.warning(self, 'Error', 'Credenciales inválidas, vuelve a intentarlo.')
         self.connection.close()
-
 
 
 class AboutDialog(QDialog):
@@ -352,7 +355,6 @@ class rfidDialog(QDialog):
         card = QLabel("Tarjeta:")
         self.cardinput = QLineEdit()
 
-
         layout.addWidget(card)
         layout.addWidget(self.cardinput)
         layout.addWidget(labelpic)
@@ -372,7 +374,7 @@ class rfidDialog(QDialog):
 
         self.connection = sqlite3.connect("database.db")
         global IDUSER
-        result = self.connection.execute("SELECT card,branch,address FROM task WHERE idUser=?",(IDUSER))
+        result = self.connection.execute("SELECT card,branch,address FROM task WHERE idUser=?", (IDUSER))
         result = result.fetchall()
         for row_number, row_data in enumerate(result):
             if (row_data[0] == tag_id):
@@ -380,7 +382,7 @@ class rfidDialog(QDialog):
                     self.fn_activarNotas(row_data[2])
         self.connection.close()
 
-    def fn_activarNotas(self,address):
+    def fn_activarNotas(self, address):
         string = 'bloc de notas activado'
         print(address)
         long = ""
@@ -394,6 +396,7 @@ class rfidDialog(QDialog):
         file.save(filename)
         playsound(filename)
 
+
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -406,15 +409,14 @@ class MainWindow(QMainWindow):
 
         self.conn = sqlite3.connect("database2.db")
         self.c = self.conn.cursor()
-        #nam = "Ejemplo"
-        #passw = "1234"
+        # nam = "Ejemplo"
+        # passw = "1234"
         self.c.execute(
             "CREATE TABLE IF NOT EXISTS user(idUser INTEGER PRIMARY KEY AUTOINCREMENT,user VARCHAR ,pass VARCHAR)")
-        #self.c.execute("INSERT INTO user (user,pass) VALUES (?,?)", (nam, passw))
-        #self.conn.commit()
+        # self.c.execute("INSERT INTO user (user,pass) VALUES (?,?)", (nam, passw))
+        # self.conn.commit()
         self.c.close()
-        #self.conn.close()
-
+        # self.conn.close()
 
         file_menu = self.menuBar().addMenu("&Tarea")
         rfid_menu = self.menuBar().addMenu("&Tarjeta")
@@ -487,19 +489,16 @@ class MainWindow(QMainWindow):
         rfid_action.triggered.connect(self.rfid)
         rfid_menu.addAction(rfid_action)
 
-
-
     def loaddata(self):
         self.connection = sqlite3.connect("database.db")
         global IDUSER
-        result = self.connection.execute("SELECT * FROM task WHERE idUser=?",(IDUSER))
+        result = self.connection.execute("SELECT * FROM task WHERE idUser=?", (IDUSER))
         self.tableWidget.setRowCount(0)
         for row_number, row_data in enumerate(result):
             self.tableWidget.insertRow(row_number)
             for column_number, data in enumerate(row_data):
                 self.tableWidget.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         self.connection.close()
-
 
     def handlePaintRequest(self, printer):
         document = QTextDocument()
@@ -512,7 +511,6 @@ class MainWindow(QMainWindow):
                 cursor.insertText(model.item(row, column).text())
                 cursor.movePosition(QTextCursor.NextCell)
         document.print_(printer)
-
 
     def insert(self):
         dlg = InsertDialog()
@@ -540,12 +538,77 @@ class MainWindow(QMainWindow):
         dlg = rfidDialog()
         dlg.exec_()
 
+def fn_activarNotas(address):
+    print("LIBRO:dirección del objeto: ",address)
+    long = ""
+    with open(address, "r", encoding="UTF-8") as file:
+        text = file.readlines()
+    for row in text:
+        long = long + row
+
+    file = gTTS(text=long, lang="ES")
+    filename = "salida.mp3"
+    file.save(filename)
+    playsound(filename)
+
+def fn_activarVideo(address):
+    print("VIDEO:dirección del objeto: ",address)
+    cap = cv2.VideoCapture(address)
+    window_name = "window"
+    interframe_wait_ms = 30
+    if not cap.isOpened():
+        exit()
+    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    while (True):
+        ret, frame = cap.read()
+        if ret:
+            cv2.imshow(window_name, frame)
+        else:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+        if cv2.waitKey(interframe_wait_ms) & 0x7F == ord('q'):
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+def listen():
+    print(threading.currentThread().getName(), 'Lanzado')
+    clf = nfc.ContactlessFrontend()
+    if not clf.open('usb'):
+        raise RuntimeError("Failed to open NFC device.")
+
+    tag = clf.connect(rdwr={'on-connect': lambda tag: False})
+    tag_id = str(tag).split('ID=')[1]
+
+    connection = sqlite3.connect("database.db")
+
+    result = connection.execute("SELECT card,branch,address FROM task WHERE idUser=1")
+    result = result.fetchall()
+    for row_number, row_data in enumerate(result):
+        if (row_data[0] == tag_id):
+            address = (row_data[2])
+            if (row_data[1] == 'Documento'):
+                fn_activarNotas(address)
+            if (row_data[1] == "Video"):
+                fn_activarVideo(address)
+    connection.close()
+
+    print(threading.currentThread().getName(), 'Deteniendo')
+
+if __name__ == '__main__':
+
+    app = QApplication(sys.argv)
+    passdlg = LoginDialog()
+    if (passdlg.exec_() == QDialog.Accepted):
+
+        window = MainWindow()
+        window.show()
+        window.loaddata()
+
+        QCoreApplication.processEvents()
+        listen()
 
 
-app = QApplication(sys.argv)
-passdlg = LoginDialog()
-if (passdlg.exec_() == QDialog.Accepted):
-    window = MainWindow()
-    window.show()
-    window.loaddata()
-sys.exit(app.exec_())
+
+    sys.exit(app.exec_())
+
