@@ -343,7 +343,7 @@ class rfidDialog(QDialog):
         self.branchinput = QComboBox()
 
         self.connection = sqlite3.connect("database.db")
-        query = "SELECT name FROM task"
+        query = "SELECT name FROM task "
         result = self.connection.execute(query)
         result = result.fetchall()
         for row_number, row_data in enumerate(result):
@@ -373,7 +373,7 @@ class rfidDialog(QDialog):
         tag_id = str(tag).split('ID=')[1]
 
         self.connection = sqlite3.connect("database.db")
-        global IDUSER
+        global IDUSER 
         result = self.connection.execute("SELECT card,branch,address FROM task WHERE idUser=?", (IDUSER))
         result = result.fetchall()
         for row_number, row_data in enumerate(result):
