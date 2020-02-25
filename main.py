@@ -1,16 +1,14 @@
-import os
-import sys, sqlite3
-
-import nfc
-import cv2
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from gtts import gTTS
-from playsound import playsound
+import sqlite3
+import sys
 import threading
 
-
+import cv2
+import nfc
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+from gtts import gTTS
+from playsound import playsound
 
 IDRFID: str
 IDUSER: int
@@ -40,7 +38,7 @@ class InsertDialog(QDialog):
         self.branchinput.addItem("Video")
         self.branchinput.addItem("Imágen")
         self.branchinput.addItem("Documento")
-        self.branchinput.addItem("Alarma")
+        self.branchinput.addItem("Videollamada")
         layout.addWidget(self.branchinput)
 
         self.addressinput = QLineEdit()
@@ -604,11 +602,6 @@ if __name__ == '__main__':
         window = MainWindow()
         window.show()
         window.loaddata()
-
-        QCoreApplication.processEvents()
-        listen()
-
-
 
     sys.exit(app.exec_())
 
