@@ -1,7 +1,6 @@
 import sqlite3
 import sys
 import threading
-
 import cv2
 import nfc
 from PyQt5.QtCore import *
@@ -108,6 +107,7 @@ class InsertDialog(QDialog):
         name = ""
         branch = ""
         address = ""
+        idCard = ""
 
         name = self.nameinput.text()
         branch = self.branchinput.itemText(self.branchinput.currentIndex())
@@ -117,8 +117,7 @@ class InsertDialog(QDialog):
         try:
             self.conn = sqlite3.connect("database.db")
             self.c = self.conn.cursor()
-            self.c.execute("INSERT INTO task (name,branch,address,card,idUser) VALUES (?,?,?,?,?)",
-                           (name, branch, address, idCard, IDUSER))
+            self.c.execute("REPLACE INTO task (name,branch,address,card,idUser) VALUES (?,?,?,?,?)",(name, branch, address,idCard,IDUSER))
             self.conn.commit()
             self.c.close()
             self.conn.close()
@@ -374,8 +373,7 @@ class rfidDialog(QDialog):
         self.branchinput = QComboBox()
 
         self.connection = sqlite3.connect("database.db")
-        query = "SELECT name FROM task "
-        result = self.connection.execute(query)
+        result = self.connection.execute("SELECT name FROM task WHERE idUser=?", (IDUSER))
         result = result.fetchall()
         for row_number, row_data in enumerate(result):
             for column_number, data in enumerate(row_data):
@@ -404,7 +402,7 @@ class rfidDialog(QDialog):
         tag_id = str(tag).split('ID=')[1]
 
         self.connection = sqlite3.connect("database.db")
-        global IDUSER 
+        global IDUSER
         result = self.connection.execute("SELECT card,branch,address FROM task WHERE idUser=?", (IDUSER))
         result = result.fetchall()
         for row_number, row_data in enumerate(result):
@@ -435,7 +433,7 @@ class MainWindow(QMainWindow):
         self.conn = sqlite3.connect("database.db")
         self.c = self.conn.cursor()
         self.c.execute(
-            "CREATE TABLE IF NOT EXISTS task(idTask INTEGER PRIMARY KEY AUTOINCREMENT,name VARCHAR ,branch TEXT,address TEXT,card VARCHAR, idUser INTEGER)")
+            "CREATE TABLE IF NOT EXISTS task(idTask INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,name VARCHAR NOT NULL,branch TEXT NOT NULL,address TEXT NOT NULL,card VARCHAR TYPE UNIQUE NOT NULL, idUser INTEGER NOT NULL)")
         self.c.close()
 
         self.conn = sqlite3.connect("database2.db")
@@ -443,7 +441,7 @@ class MainWindow(QMainWindow):
         # nam = "Ejemplo"
         # passw = "1234"
         self.c.execute(
-            "CREATE TABLE IF NOT EXISTS user(idUser INTEGER PRIMARY KEY AUTOINCREMENT,user VARCHAR ,pass VARCHAR)")
+            "CREATE TABLE IF NOT EXISTS user(idUser INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,user VARCHAR NOT NULL,pass VARCHAR NOT NULL)")
         # self.c.execute("INSERT INTO user (user,pass) VALUES (?,?)", (nam, passw))
         # self.conn.commit()
         self.c.close()

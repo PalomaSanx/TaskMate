@@ -2,10 +2,10 @@ import sqlite3
 import sys
 import threading
 import webbrowser
-
 import cv2
 import nfc
 import pyautogui as pyautogui
+import vlc
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import *
@@ -30,8 +30,8 @@ def fn_activarNotas(address):
     playsound(filename)
 
 
-def fn_activarVideo(address):
-    print("VIDEO:dirección del objeto: ", address)
+def fn_activarImagen(address):
+    print("IMAGEN:dirección del objeto: ", address)
     cap = cv2.VideoCapture(address)
     window_name = "window"
     interframe_wait_ms = 30
@@ -50,6 +50,14 @@ def fn_activarVideo(address):
             break
     cap.release()
     cv2.destroyAllWindows()
+
+def fn_activarVideo(address):
+    print("VIDEO:dirección del objeto: ", address)
+    media = address
+    player = vlc.MediaPlayer(media)
+    player.play()
+
+
 
 
 def fn_skypeCallProcess(address):
@@ -85,6 +93,8 @@ def listen():
             if (row_data[1] == "Videollamada"):
                 fn_skypeCallProcess(address)
             if (row_data[1] == "Imágen"):
+                fn_activarImagen(address)
+            if (row_data[1] == "Música"):
                 fn_activarVideo(address)
 
     connection.close()
