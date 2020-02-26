@@ -18,44 +18,75 @@ class InsertDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(InsertDialog, self).__init__(*args, **kwargs)
 
+
+        self.setWindowIcon(QIcon('icon/add_task.png'))
         self.QBtn = QPushButton()
-        self.QBtn.setText("Añadir")
+        self.QBtn.setIcon((QIcon('icon/add_button.jpg')))
+        self.QBtn.setIconSize(QSize(55, 55))
+        self.QBtn.setStyleSheet("background-color: transparent;")
+        self.QBtn.resize(500, 500)
+
 
         self.setWindowTitle("Añadir Tarea")
-        self.setFixedWidth(300)
-        self.setFixedHeight(250)
+        self.setFixedWidth(500)
+        self.setFixedHeight(500)
 
         self.QBtn.clicked.connect(self.addstudent)
 
         layout = QVBoxLayout()
 
+
+        self.labelStep1 = QLabel()
+        self.labelStep1.setText("  1 - Inserte el nombre de la tarea:")
         self.nameinput = QLineEdit()
         self.nameinput.setPlaceholderText("Nombre")
+        layout.addWidget(self.labelStep1)
         layout.addWidget(self.nameinput)
+        self.labelStep1.setStyleSheet("background-color: #F5B25E;""font-size: 15px; color: black;")
 
+        self.labelStep2 = QLabel()
+        self.labelStep2.setText("  2 - Seleccione el tipo de tarea:")
         self.branchinput = QComboBox()
         self.branchinput.addItem("Música")
         self.branchinput.addItem("Video")
         self.branchinput.addItem("Imágen")
         self.branchinput.addItem("Documento")
         self.branchinput.addItem("Videollamada")
+        layout.addWidget(self.labelStep2)
         layout.addWidget(self.branchinput)
+        self.labelStep2.setStyleSheet("background-color: #F5B25E; color: black;""font-size: 15px; color: black;")
 
+        self.labelStep3 = QLabel()
+        self.labelStep3.setText("  3 - Seleccione la ubicación del archivo/Nick usuario")
         self.addressinput = QLineEdit()
-        self.addressinput.setPlaceholderText("Dirección")
+        self.addressinput.setPlaceholderText("Dirección/Nick usuario")
+        layout.addWidget(self.labelStep3)
         layout.addWidget(self.addressinput)
+        self.labelStep3.setStyleSheet("background-color: #F5B25E; color: black;""font-size: 15px; color: black;")
 
         self.QBtnFile = QPushButton()
-        self.QBtnFile.setText("Seleccionar archivo")
+        self.QBtnFile.setText("Seleccionar archivo (*No es necesario en el caso de videollamada)")
         self.QBtnFile.clicked.connect(self.open_file)
         layout.addWidget(self.QBtnFile)
 
+        self.labelpic2 = QLabel()
+        self.pixmap2 = QPixmap('icon/rfid.png')
+        self.pixmap2 = self.pixmap2.scaledToWidth(300)
+        self.labelpic2.setPixmap(self.pixmap2)
+        self.labelpic2.setFixedHeight(100)
+        self.labelpic2.setAlignment(Qt.AlignCenter)
+        self.labelStep4 = QLabel()
+        self.labelStep4.setText("  4 - Situe una tarjeta en el lector:")
         self.QBtnFind = QPushButton()
         self.QBtnFind.setText("Leer tarjeta")
+        layout.addWidget(self.labelpic2)
+        layout.addWidget(self.labelStep4)
         self.QBtnFind.clicked.connect(self.getRfid)
+        self.labelStep4.setStyleSheet("background-color: #93F358; color: black;""font-size: 15px; color: black;")
 
         card = QLabel("Tarjeta:")
         self.cardinput = QLineEdit()
+        self.cardinput.setDisabled(True)
 
         layout.addWidget(card)
         layout.addWidget(self.cardinput)
@@ -187,6 +218,8 @@ class LoginDialog(QDialog):
         self.setFixedHeight(120)
 
         layout = QVBoxLayout()
+        self.setWindowIcon(QIcon('icon/logo.png'))
+
 
         self.userinput = QLineEdit()
         self.passinput = QLineEdit()
@@ -421,6 +454,7 @@ class MainWindow(QMainWindow):
         help_menu = self.menuBar().addMenu("&Ayuda")
 
         self.setWindowTitle("TaskMate")
+        self.setWindowIcon(QIcon('icon/logo.png'))
 
         self.setMinimumSize(800, 600)
 

@@ -7,7 +7,7 @@ import cv2
 import nfc
 import pyautogui as pyautogui
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QIcon
 from PyQt5.QtWidgets import *
 from gtts import gTTS
 from playsound import playsound
@@ -65,6 +65,7 @@ def listen():
     print(threading.currentThread().getName(), 'Lanzado')
 
     clf = nfc.ContactlessFrontend()
+
     if not clf.open('usb'):
         raise RuntimeError("Failed to open NFC device.")
 
@@ -96,6 +97,8 @@ class TaskMate(QWidget):
         super().__init__()
         # titulo ventana
         self.setWindowTitle("--TaskMate--")
+        # icono ventana
+        self.setWindowIcon(QIcon('icon/logo.png'))
         # Mensaje principal
         self.title = QLabel("Acerque tarjeta a lector")
         self.title.setAlignment(Qt.AlignCenter)
@@ -117,7 +120,7 @@ class TaskMate(QWidget):
 
         self.setGeometry(250, 50, 800, 200)
         self.resize(self.pixmap.width(), self.pixmap.height())
-        self.showFullScreen()
+        self.show()
 
 
 if __name__ == '__main__':
