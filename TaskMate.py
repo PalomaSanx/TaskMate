@@ -92,7 +92,7 @@ def listen():
             if (row_data[1] == 'Documento'):
                 fn_activarNotas(address)
             if (row_data[1] == "Video"):
-                fn_activarImagen(address)
+                fn_activarVideo(address)
             if (row_data[1] == "Videollamada"):
                 fn_skypeCallProcess(address)
             if (row_data[1] == "Imágen"):
