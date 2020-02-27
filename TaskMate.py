@@ -1,6 +1,7 @@
 import sqlite3
 import sys
 import threading
+import time
 import webbrowser
 import cv2
 import nfc
@@ -75,6 +76,7 @@ def fn_skypeCallProcess(address):
 def listen():
     print(threading.currentThread().getName(), 'Lanzado')
 
+
     clf = nfc.ContactlessFrontend()
 
     if not clf.open('usb'):
@@ -100,10 +102,11 @@ def listen():
             if (row_data[1] == "Música"):
                 fn_activarVideo(address)
 
-
     connection.close()
+    clf.close()
 
     print(threading.currentThread().getName(), 'Deteniendo')
+    listen()
 
 
 class TaskMate(QWidget):
