@@ -134,7 +134,7 @@ class InsertDialog(QDialog):
         for file in file_path:
             cont=cont+1
             if(cont >=2):
-                f = "'"+f+"'" + ","+"'"+file+"'"
+                f = f + "," + file
         self.addressinput.setText(f)
 
 class SearchDialog(QDialog):

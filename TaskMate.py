@@ -16,7 +16,8 @@ from playsound import playsound
 IDRFID: str
 IDUSER: int
 
-#------------------------------------------FUNCIONES--------------------------------------------#
+
+# ------------------------------------------FUNCIONES--------------------------------------------#
 def fn_activarNotas(address):
     print("LIBRO:dirección del objeto: ", address)
     long = ""
@@ -31,9 +32,9 @@ def fn_activarNotas(address):
     playsound(filename)
 
 
-def fn_activarImagen(imagenes):
+def fn_activarImagen(imagenes: str):
     print("IMAGEN/s LANZADO")
-    files = [imagenes]
+    files = imagenes.split(",")
     for imagen in files:
         cap = cv2.VideoCapture(imagen)
         window_name = "window"
@@ -54,11 +55,11 @@ def fn_activarImagen(imagenes):
         cap.release()
         cv2.destroyAllWindows()
 
+
 def fn_activarVideo(address):
     print("VIDEO:dirección del objeto: ", address)
     player = vlc.MediaPlayer(address)
     player.play()
-
 
 
 def fn_skypeCallProcess(address):
@@ -69,38 +70,36 @@ def fn_skypeCallProcess(address):
     pyautogui.click(700, 550)
     pyautogui.click(700, 505)
 
-#----------------------------Escucha NFC---------------------------------#
+
+# ----------------------------Escucha NFC---------------------------------#
 def listen():
     print(threading.currentThread().getName(), 'Lanzado')
 
-    """clf = nfc.ContactlessFrontend()
+    clf = nfc.ContactlessFrontend()
 
     if not clf.open('usb'):
         raise RuntimeError("Failed to open NFC device.")
 
     tag = clf.connect(rdwr={'on-connect': lambda tag: False})
-    tag_id = str(tag).split('ID=')[1]"""
-    tag_id = ''
-    if(tag_id!=0):
+    tag_id = str(tag).split('ID=')[1]
 
-        QMessageBox.information(QMessageBox(), 'Éxito', 'La tarea será lanzada.')
+    connection = sqlite3.connect("database.db")
+    result = connection.execute("SELECT card,branch,address FROM task")
+    result = result.fetchall()
+    for row_number, row_data in enumerate(result):
+        if (row_data[0] == tag_id):
+            address = (row_data[2])
+            if (row_data[1] == 'Documento'):
+                fn_activarNotas(address)
+            if (row_data[1] == "Video"):
+                fn_activarImagen(address)
+            if (row_data[1] == "Videollamada"):
+                fn_skypeCallProcess(address)
+            if (row_data[1] == "Imágen"):
+                fn_activarImagen(address)
+            if (row_data[1] == "Música"):
+                fn_activarVideo(address)
 
-        connection = sqlite3.connect("database.db")
-        result = connection.execute("SELECT card,branch,address FROM task")
-        result = result.fetchall()
-        for row_number, row_data in enumerate(result):
-            if (row_data[0] == tag_id):
-                address = (row_data[2])
-                if (row_data[1] == 'Documento'):
-                    fn_activarNotas(address)
-                if (row_data[1] == "Video"):
-                    fn_activarImagen(address)
-                if (row_data[1] == "Videollamada"):
-                    fn_skypeCallProcess(address)
-                if (row_data[1] == "Imágen"):
-                    fn_activarImagen(address)
-                if (row_data[1] == "Música"):
-                    fn_activarVideo(address)
 
     connection.close()
 
@@ -136,7 +135,7 @@ class TaskMate(QWidget):
 
         self.setGeometry(250, 50, 800, 200)
         self.resize(self.pixmap.width(), self.pixmap.height())
-        self.show()
+        self.showFullScreen()
 
 
 if __name__ == '__main__':
@@ -144,6 +143,8 @@ if __name__ == '__main__':
     ex = TaskMate()
 
     QCoreApplication.processEvents()
-    listen()
-
+    try:
+        listen()
+    except Exception:
+        print("CONECTAR LECTOR DE TARJETAS")
     sys.exit(app.exec_())
