@@ -13,6 +13,7 @@ IDRFID: str
 IDUSER: int
 
 
+
 class InsertDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(InsertDialog, self).__init__(*args, **kwargs)
@@ -127,9 +128,14 @@ class InsertDialog(QDialog):
             QMessageBox.warning(QMessageBox(), 'Error', 'No se puede añadir la tarea a la base de datos.')
 
     def open_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, "Open image", "/Users", "Images (*.png *)jpg *.txt")
-        self.addressinput.setText(file_path)
-
+        file_path, _ = QFileDialog.getOpenFileNames(self, "Open image", "/Users", "Images (*.png *)jpg *.txt")
+        f=file_path[0]
+        cont=0
+        for file in file_path:
+            cont=cont+1
+            if(cont >=2):
+                f = "'"+f+"'" + ","+"'"+file+"'"
+        self.addressinput.setText(f)
 
 class SearchDialog(QDialog):
     def __init__(self, *args, **kwargs):
@@ -264,8 +270,8 @@ class AboutDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(AboutDialog, self).__init__(*args, **kwargs)
 
-        self.setFixedWidth(300)
-        self.setFixedHeight(250)
+        self.setFixedWidth(500)
+        self.setFixedHeight(600)
 
         QBtn = QDialogButtonBox.Ok  # No cancel
         self.buttonBox = QDialogButtonBox(QBtn)
@@ -288,59 +294,54 @@ class AboutDialog(QDialog):
         layout.addWidget(title)
 
         layout.addWidget(QLabel("Primer paso: seleccione añadir tarea."))
-        layout.addWidget(QLabel("Segundo paso: introduce los valores solicitados."))
-        layout.addWidget(QLabel("Tercer paso: pulse el botón 'Añadir'."))
-        layout.addWidget(QLabel("¡ENHORABUENA! La tarea ha sido añadida con éxito."))
+        layout.addWidget(QLabel("Segundo paso: seleccione el tipo de tarea."))
+        layout.addWidget(QLabel("Tercer paso: introduce los valores solicitados."))
+        layout.addWidget(QLabel("Cuarto paso: debe acercar una tarjeta al lector."))
+        layout.addWidget(QLabel("¡ENHORABUENA! La tarea ha sido añadida con éxito y vinculada a dicha tarjeta."))
+        layout.addWidget(QLabel("<a href=\"http://www.taskmate.es\">www.taskmate.es</a>"))
         layout.addWidget(labelpic)
 
         layout.addWidget(self.buttonBox)
 
         self.setLayout(layout)
 
-
-class AboutDialog2(QDialog):
-    def __init__(self, *args, **kwargs):
-        super(AboutDialog, self).__init__(*args, **kwargs)
-
-        self.setFixedWidth(300)
-        self.setFixedHeight(250)
-
-        QBtn = QDialogButtonBox.Ok  # No cancel
-        self.buttonBox = QDialogButtonBox(QBtn)
-        self.buttonBox.accepted.connect(self.accept)
-        self.buttonBox.rejected.connect(self.reject)
-
-        layout = QVBoxLayout()
-
-        title = QLabel("Pasos")
-        font = title.font()
-        font.setPointSize(20)
-        title.setFont(font)
-
-        labelpic = QLabel()
-        pixmap = QPixmap('icon/pair.png')
-        pixmap = pixmap.scaledToWidth(275)
-        labelpic.setPixmap(pixmap)
-        labelpic.setFixedHeight(150)
-
-        layout.addWidget(title)
-
-        layout.addWidget(QLabel("Primer paso: seleccione la tarea que desee."))
-        layout.addWidget(QLabel("Segundo paso: acerque tarjeta al lector."))
-        layout.addWidget(QLabel("Tercer paso: pulse el botón 'Vincular'."))
-        layout.addWidget(QLabel("¡ENHORABUENA! La tarea ha sido vinculada con éxito."))
-        layout.addWidget(labelpic)
-
-        layout.addWidget(self.buttonBox)
-
-        self.setLayout(layout)
 
 
 class rfidDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(rfidDialog, self).__init__(*args, **kwargs)
 
-        self.QBtnPair = QPushButton()
+        self.setFixedWidth(600)
+        self.setFixedHeight(300)
+
+        QBtn = QDialogButtonBox.Ok  # No cancel
+        self.buttonBox = QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout = QVBoxLayout()
+
+        title = QLabel("Este es un proyecto destinado a la asociacion CRMF de Albacete")
+        font = title.font()
+        font.setPointSize(15)
+        title.setFont(font)
+        title.setFixedHeight(50)
+        title.setAlignment(Qt.AlignCenter)
+
+        layout.addWidget(title)
+
+        labelpic = QLabel()
+        pixmap = QPixmap('icon/CRMF.png')
+        pixmap = pixmap.scaledToWidth(300)
+        labelpic.setPixmap(pixmap)
+        labelpic.setFixedHeight(100)
+        labelpic.setAlignment(Qt.AlignCenter)
+
+        layout.addWidget(labelpic)
+
+        self.setLayout(layout)
+
+
+    """    self.QBtnPair = QPushButton()
         self.QBtnPair.setText("Vincular")
 
         self.setFixedWidth(500)
@@ -391,7 +392,7 @@ class rfidDialog(QDialog):
 
         self.QBtnPair.clicked.connect(self.escucha)
 
-        self.setLayout(layout)
+        self.setLayout(layout)"""
 
     def escucha(self):
         clf = nfc.ContactlessFrontend()
@@ -448,7 +449,7 @@ class MainWindow(QMainWindow):
         # self.conn.close()
 
         file_menu = self.menuBar().addMenu("&Tarea")
-        rfid_menu = self.menuBar().addMenu("&Tarjeta")
+        rfid_menu = self.menuBar().addMenu("&CRMF")
         help_menu = self.menuBar().addMenu("&Ayuda")
 
         self.setWindowTitle("TaskMate")
@@ -511,11 +512,8 @@ class MainWindow(QMainWindow):
         about_action = QAction(QIcon("icon/info.png"), "Crear nueva tarea", self)
         about_action.triggered.connect(self.about)
         help_menu.addAction(about_action)
-        about_action2 = QAction(QIcon("icon/info.png"), "Vincular tarjeta con tarea", self)
-        about_action2.triggered.connect(self.about2)
-        help_menu.addAction(about_action2)
 
-        rfid_action = QAction(QIcon("icon/pair.png"), "Vincular tarjeta con tarea", self)
+        rfid_action = QAction(QIcon("icon/pair.png"), "Info", self)
         rfid_action.triggered.connect(self.rfid)
         rfid_menu.addAction(rfid_action)
 
@@ -558,10 +556,6 @@ class MainWindow(QMainWindow):
 
     def about(self):
         dlg = AboutDialog()
-        dlg.exec_()
-
-    def about2(self):
-        dlg = AboutDialog2()
         dlg.exec_()
 
     def rfid(self):

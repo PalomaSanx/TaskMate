@@ -4,6 +4,7 @@ import threading
 import webbrowser
 import cv2
 import nfc
+import vlc
 import pyautogui as pyautogui
 import vlc
 from PyQt5.QtCore import *
@@ -15,7 +16,7 @@ from playsound import playsound
 IDRFID: str
 IDUSER: int
 
-
+#------------------------------------------FUNCIONES--------------------------------------------#
 def fn_activarNotas(address):
     print("LIBRO:dirección del objeto: ", address)
     long = ""
@@ -30,33 +31,33 @@ def fn_activarNotas(address):
     playsound(filename)
 
 
-def fn_activarImagen(address):
-    print("IMAGEN:dirección del objeto: ", address)
-    cap = cv2.VideoCapture(address)
-    window_name = "window"
-    interframe_wait_ms = 30
-    if not cap.isOpened():
-        exit()
-    cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
-    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    while (True):
-        ret, frame = cap.read()
-        if ret:
-            cv2.imshow(window_name, frame)
-        else:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+def fn_activarImagen(imagenes):
+    print("IMAGEN/s LANZADO")
+    files = [imagenes]
+    for imagen in files:
+        cap = cv2.VideoCapture(imagen)
+        window_name = "window"
+        interframe_wait_ms = 5000
+        if not cap.isOpened():
+            exit()
+        cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        while (True):
+            ret, frame = cap.read()
+            if ret:
+                cv2.imshow(window_name, frame)
+            else:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-        if cv2.waitKey(interframe_wait_ms) & 0x7F == ord('q'):
-            break
-    cap.release()
-    cv2.destroyAllWindows()
+            if cv2.waitKey(interframe_wait_ms):
+                break
+        cap.release()
+        cv2.destroyAllWindows()
 
 def fn_activarVideo(address):
     print("VIDEO:dirección del objeto: ", address)
-    media = address
-    player = vlc.MediaPlayer(media)
+    player = vlc.MediaPlayer(address)
     player.play()
-
 
 
 
@@ -68,34 +69,38 @@ def fn_skypeCallProcess(address):
     pyautogui.click(700, 550)
     pyautogui.click(700, 505)
 
-
+#----------------------------Escucha NFC---------------------------------#
 def listen():
     print(threading.currentThread().getName(), 'Lanzado')
 
-    clf = nfc.ContactlessFrontend()
+    """clf = nfc.ContactlessFrontend()
 
     if not clf.open('usb'):
         raise RuntimeError("Failed to open NFC device.")
 
     tag = clf.connect(rdwr={'on-connect': lambda tag: False})
-    tag_id = str(tag).split('ID=')[1]
+    tag_id = str(tag).split('ID=')[1]"""
+    tag_id = ''
+    if(tag_id!=0):
 
-    connection = sqlite3.connect("database.db")
-    result = connection.execute("SELECT card,branch,address FROM task")
-    result = result.fetchall()
-    for row_number, row_data in enumerate(result):
-        if (row_data[0] == tag_id):
-            address = (row_data[2])
-            if (row_data[1] == 'Documento'):
-                fn_activarNotas(address)
-            if (row_data[1] == "Video"):
-                fn_activarVideo(address)
-            if (row_data[1] == "Videollamada"):
-                fn_skypeCallProcess(address)
-            if (row_data[1] == "Imágen"):
-                fn_activarImagen(address)
-            if (row_data[1] == "Música"):
-                fn_activarVideo(address)
+        QMessageBox.information(QMessageBox(), 'Éxito', 'La tarea será lanzada.')
+
+        connection = sqlite3.connect("database.db")
+        result = connection.execute("SELECT card,branch,address FROM task")
+        result = result.fetchall()
+        for row_number, row_data in enumerate(result):
+            if (row_data[0] == tag_id):
+                address = (row_data[2])
+                if (row_data[1] == 'Documento'):
+                    fn_activarNotas(address)
+                if (row_data[1] == "Video"):
+                    fn_activarImagen(address)
+                if (row_data[1] == "Videollamada"):
+                    fn_skypeCallProcess(address)
+                if (row_data[1] == "Imágen"):
+                    fn_activarImagen(address)
+                if (row_data[1] == "Música"):
+                    fn_activarVideo(address)
 
     connection.close()
 
@@ -118,6 +123,7 @@ class TaskMate(QWidget):
         self.title.setStyleSheet("background-color: black;""font-size: 25px; color: #A0184B;")
         # Imagen = Logo
         self.pixmap = QPixmap("icon/logo.png")
+        self.pixmap = self.pixmap.scaledToWidth(250)
         self.label = QLabel()
         self.label.setPixmap(self.pixmap)
         self.label.setAlignment(Qt.AlignCenter)
